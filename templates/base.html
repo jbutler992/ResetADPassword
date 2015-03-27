@@ -1,0 +1,63 @@
+<html>
+    <center>
+        <head>
+            <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+            <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css" />
+            <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+            <style>
+                .ui-menu {width: 300px;}
+                </style>
+            <script>
+            function setPass(){
+                jQuery.ajaxSetup({async:false});
+                var user = document.getElementById("userToChange").innerHTML;
+                var pass = jQuery("#userPass").val();
+                jQuery.post("/setPass",{userName: user, password: pass});
+            }
+            function onOpen(){
+                jQuery.ajaxSetup({async:false});
+                var YOGs = "";
+                var yogMenu = "";
+                jQuery.post("/getOUs", function(data) {YOGs=data.ouArray});
+                for (var i = 0; i < YOGs.length; i++){
+                    yogMenu += "<li>";
+                    yogMenu += YOGs[i];
+                    var names = "";
+                    var nameMenu = "";
+                    jQuery.post("/getNames", {Year: YOGs[i]}, function(data) {names=data.nameArray});
+                    if(names.length > 0){
+                        nameMenu += "<ul>";
+                        for (var j = 0; j < names.length; j++){
+                            nameMenu += "<li>"+names[j]+"</li>";
+                        }
+                        nameMenu += "</ul>";
+                        yogMenu += nameMenu;
+                    }
+                    yogMenu += "</li>";
+                }
+                var menuLoc = document.getElementById("menu");
+                menuLoc.innerHTML += yogMenu;
+                jQuery("#menu").menu({
+                                     select: function(event, ui){
+                                     var nameLoc = document.getElementById("userToChange");
+                                     nameLoc.innerHTML = ui.item.text();
+                                     }
+                                     });
+            }
+            </script>
+        </head>
+        <title>Password Reset Utility</title>
+        <body onload="onOpen()">
+            <ul id="menu">
+            </ul>
+            </br>
+            User to change password for: <div id="userToChange"></div>
+            </br>
+            <form action="" method="get">
+                Set Password to: <input type="text" id="userPass">
+                    </br>
+                    <input type="submit" onclick="setPass(); location.href='/';" value='Set Password'>
+                        </form>
+        </body>
+    </center>
+</html>
